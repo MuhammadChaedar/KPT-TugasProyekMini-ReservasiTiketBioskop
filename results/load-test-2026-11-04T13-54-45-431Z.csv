@@ -1,4 +1,0 @@
-clients,requests,successes,errors,average_latency_ms,p95_latency_ms,elapsed_seconds,throughput_rps
-1,100,100,0,2.123,3.107,0.213,468.98
-5,100,100,0,4.554,7.553,0.092,1087.6
-20,100,100,0,14.062,21.317,0.075,1332.35
