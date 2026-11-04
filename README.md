@@ -23,6 +23,39 @@ Server mendengarkan di `0.0.0.0:50051`. Atur `GRPC_PORT` atau `DATA_FILE` melalu
 
 Jadwal dan film saat ini adalah data demo dalam memori. Dua jadwal contoh ialah `show-001` dan `show-002`; kursi tersedia A1–E8.
 
+## Menjalankan client
+
+Di terminal lain pada komputer yang sama, jalankan `npm run client`. Client meminta film, jadwal, lalu menampilkan peta kursi dan mengirim reservasi. Alamat default adalah `localhost:50051`. Untuk server di komputer lain, atur alamat server:
+
+```powershell
+$env:GRPC_ADDRESS="192.168.1.20:50051"
+npm run client
+```
+
+Client menetapkan deadline 3 detik (`RPC_TIMEOUT_MS`) dan maksimal dua retry (`RPC_MAX_RETRIES`) untuk timeout atau server tidak tersedia. Request reservasi menggunakan satu `request_id` tetap selama retry; operasi pemesanan baru memperoleh ID baru.
+
+## Demo lintas container dengan Docker Compose
+
+Prasyarat: Docker Desktop dengan Compose. Dari direktori proyek jalankan:
+
+```sh
+docker compose build
+docker compose up -d server
+docker compose run --rm client
+```
+
+Client berjalan di container terpisah dan mengakses `server:50051`. Data disimpan pada volume `cinema-data`; port server 50051 juga dipublikasikan ke host. `docker compose down` mempertahankan volume, sedangkan `docker compose down -v` menghapus data demo.
+
+## Demo dari dua komputer
+
+Komputer A: jalankan `npm install` dan `npm start`. Izinkan koneksi TCP port 50051 melalui firewall pada jaringan lokal. Komputer B: checkout proyek, jalankan `npm install`, kemudian arahkan client ke IP LAN komputer A:
+
+```sh
+GRPC_ADDRESS=192.168.1.20:50051 npm run client
+```
+
+Di PowerShell, set `$env:GRPC_ADDRESS="192.168.1.20:50051"` lalu jalankan `npm run client`. Ganti IP contoh dengan alamat komputer A. Jalankan hanya satu server karena file data lokal tidak menyinkronkan replika.
+
 ## Konsistensi pemesanan
 
 Semua perubahan reservasi melewati antrean lock di dalam satu proses server. Server memeriksa kursi dan ID permintaan di bagian kritis yang sama, menulis state baru ke file sementara lalu mengganti file data secara atomik, dan baru setelah itu menerbitkan perubahan ke client stream. Dengan demikian dua permintaan serentak untuk kursi yang sama tidak bisa sama-sama berhasil pada satu instance server.
@@ -31,6 +64,6 @@ Semua perubahan reservasi melewati antrean lock di dalam satu proses server. Ser
 
 Lock dan penyimpanan file ini ditujukan untuk demo satu instance. Menjalankan beberapa replika server memerlukan database bersama dengan transaksi/constraint unik atau mekanisme lock terdistribusi; file lokal tidak mengoordinasikan proses atau komputer berbeda.
 
-## Pengembangan berikutnya
+## Pengujian beban
 
-Client perlu menerapkan deadline/timeout dan retry dengan `request_id` yang sama. Anggota pengujian dapat membandingkan hasil 1, 5, dan 20 client bersamaan, termasuk membuktikan hanya satu reservasi berhasil ketika semua client merebut kursi yang sama.
+Anggota pengujian dapat membandingkan hasil 1, 5, dan 20 client bersamaan, termasuk membuktikan hanya satu reservasi berhasil ketika semua client merebut kursi yang sama.

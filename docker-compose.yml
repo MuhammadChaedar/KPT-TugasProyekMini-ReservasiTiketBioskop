@@ -1,0 +1,25 @@
+services:
+  server:
+    build: .
+    command: ["node", "src/server.js"]
+    environment:
+      GRPC_HOST: 0.0.0.0
+      GRPC_PORT: 50051
+      DATA_FILE: /app/data/reservations.json
+    ports:
+      - "50051:50051"
+    volumes:
+      - cinema-data:/app/data
+    restart: unless-stopped
+  client:
+    build: .
+    command: ["node", "src/client.js"]
+    environment:
+      GRPC_ADDRESS: server:50051
+      RPC_TIMEOUT_MS: 3000
+      RPC_MAX_RETRIES: 2
+    depends_on: [server]
+    stdin_open: true
+    tty: true
+volumes:
+  cinema-data:
