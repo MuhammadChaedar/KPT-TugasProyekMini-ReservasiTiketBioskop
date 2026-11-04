@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package cinema.v1;
+
+service CinemaService {
+  rpc ListMovies (ListMoviesRequest) returns (ListMoviesResponse);
+  rpc ListShowtimes (ListShowtimesRequest) returns (ListShowtimesResponse);
+  rpc GetSeatMap (GetSeatMapRequest) returns (GetSeatMapResponse);
+  rpc ReserveSeat (ReserveSeatRequest) returns (ReserveSeatResponse);
+  // Sends the current seat map first, then pushes an update after each reservation.
+  rpc WatchSeatMap (WatchSeatMapRequest) returns (stream SeatMapUpdate);
+}
+
+message ListMoviesRequest {}
+message Movie {
+  string movie_id = 1;
+  string title = 2;
+  uint32 duration_minutes = 3;
+}
+message ListMoviesResponse { repeated Movie movies = 1; }
+
+message ListShowtimesRequest { string movie_id = 1; }
+message Showtime {
+  string showtime_id = 1;
+  string movie_id = 2;
+  string starts_at = 3;
+  string auditorium = 4;
+}
+message ListShowtimesResponse { repeated Showtime showtimes = 1; }
+
+message GetSeatMapRequest { string showtime_id = 1; }
+enum SeatStatus {
+  SEAT_STATUS_UNSPECIFIED = 0;
+  SEAT_STATUS_AVAILABLE = 1;
+  SEAT_STATUS_RESERVED = 2;
+}
+message Seat {
+  string seat_id = 1;
+  SeatStatus status = 2;
+}
+message GetSeatMapResponse {
+  string showtime_id = 1;
+  repeated Seat seats = 2;
+}
+
+message ReserveSeatRequest {
+  // Generate once per logical operation and reuse unchanged on every retry.
+  string request_id = 1;
+  string showtime_id = 2;
+  string seat_id = 3;
+  string customer_id = 4;
+}
+enum ReservationStatus {
+  RESERVATION_STATUS_UNSPECIFIED = 0;
+  RESERVATION_STATUS_CONFIRMED = 1;
+  RESERVATION_STATUS_SEAT_UNAVAILABLE = 2;
+}
+message ReserveSeatResponse {
+  string request_id = 1;
+  ReservationStatus status = 2;
+  string reservation_id = 3;
+  string message = 4;
+}
+
+message WatchSeatMapRequest { string showtime_id = 1; }
+message SeatMapUpdate {
+  string showtime_id = 1;
+  repeated Seat seats = 2;
+  string updated_at = 3;
+}
