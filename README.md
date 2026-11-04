@@ -21,6 +21,18 @@ npm start
 
 Server mendengarkan di `0.0.0.0:50051`. Atur `GRPC_PORT` atau `DATA_FILE` melalui environment bila diperlukan. Data reservasi disimpan pada `data/reservations.json`, sehingga tetap tersedia setelah proses server dimulai ulang.
 
+## Menjalankan dengan Docker Compose
+
+Pastikan Docker Desktop sudah dibuka dan status engine-nya berjalan. Dari folder proyek yang berisi `docker-compose.yml`, jalankan:
+
+```sh
+docker compose build
+docker compose up -d server
+docker compose run --rm client
+```
+
+Server tersedia pada port `50051` di komputer host. Client berjalan pada container terpisah dan terhubung ke `server:50051`. Data reservasi disimpan di named volume `cinema-data`. Hentikan server dengan `docker compose down`; volume data tetap tersimpan.
+
 Jadwal dan film saat ini adalah data demo dalam memori. Dua jadwal contoh ialah `show-001` dan `show-002`; kursi tersedia A1–E8.
 
 ## Menjalankan client
