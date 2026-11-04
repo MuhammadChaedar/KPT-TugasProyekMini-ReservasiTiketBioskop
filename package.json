@@ -6,7 +6,8 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "client": "node src/client.js"
+    "client": "node src/client.js",
+    "benchmark": "node scripts/load-test.js"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.13.4",

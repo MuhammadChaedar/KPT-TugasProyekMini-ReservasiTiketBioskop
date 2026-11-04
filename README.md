@@ -66,4 +66,20 @@ Lock dan penyimpanan file ini ditujukan untuk demo satu instance. Menjalankan be
 
 ## Pengujian beban
 
-Anggota pengujian dapat membandingkan hasil 1, 5, dan 20 client bersamaan, termasuk membuktikan hanya satu reservasi berhasil ketika semua client merebut kursi yang sama.
+Pastikan server hidup di terminal pertama, lalu jalankan dari terminal kedua:
+
+```sh
+npm run benchmark
+```
+
+Skrip mengukur 100 pemanggilan `GetSeatMap` untuk setiap tingkat konkurensi 1, 5, dan 20 client. Ini mengukur latensi rata-rata dan throughput RPC tanpa menghabiskan kursi. Setelah itu, 20 client mengirim reservasi secara bersamaan untuk kursi kosong yang sama; hasil yang diharapkan tepat satu `CONFIRMED` dan 19 `SEAT_UNAVAILABLE`. Kursi pada pengujian perebutan akan menjadi terisi secara permanen di file data server.
+
+Hasil otomatis tersimpan di `results/` sebagai JSON (termasuk rincian kontensi) dan CSV (tabel beban). Variabel yang dapat diatur: `GRPC_ADDRESS`, `BENCH_CLIENTS` (contoh `1,5,20`), `BENCH_REQUESTS` (default `100` untuk setiap skenario), `BENCH_SHOWTIME` (default `show-001`), dan `BENCH_OUTPUT` (default `results`). Di PowerShell:
+
+```powershell
+$env:BENCH_REQUESTS="100"
+$env:BENCH_SHOWTIME="show-001"
+npm run benchmark
+```
+
+Lihat [prosedur dan format laporan](docs/PENGUJIAN.md) untuk langkah demo, tabel hasil, dan catatan interpretasi metrik.
